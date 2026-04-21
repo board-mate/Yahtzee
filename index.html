@@ -68,45 +68,28 @@
             </div>
         </header>
 
-        <div class="grid md:grid-cols-3 gap-6">
+        <!-- 메인 게임 영역 (주사위 + 점수판) -->
+        <div class="grid md:grid-cols-3 gap-6 mb-8">
             
-            <!-- 왼쪽: 주사위 & 랭킹 영역 -->
-            <div class="md:col-span-2 space-y-6">
-                <!-- 주사위 -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <!-- 왼쪽: 주사위 영역 -->
+            <div class="md:col-span-2">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center h-full flex flex-col justify-center">
                     <h2 class="text-lg font-bold text-slate-700 mb-6 flex justify-center items-center gap-2">
                         <i data-lucide="rotate-cw"></i> 주사위 굴리기 (남은 횟수: <span id="rolls-left" class="text-blue-600 text-2xl">3</span>)
                     </h2>
                     
-                    <div class="flex justify-center gap-2 md:gap-4 mb-8" id="dice-container"></div>
+                    <div class="flex justify-center gap-2 md:gap-6 mb-10" id="dice-container"></div>
 
-                    <button id="roll-btn" onclick="rollDice()" class="w-full md:w-auto px-12 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2 mx-auto disabled:bg-slate-300 disabled:cursor-not-allowed">
-                        <i data-lucide="dice-5"></i>
+                    <button id="roll-btn" onclick="rollDice()" class="w-full md:w-auto px-12 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black text-2xl rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-3 mx-auto disabled:bg-slate-300 disabled:cursor-not-allowed">
+                        <i data-lucide="dice-5" class="w-8 h-8"></i>
                         굴리기!
                     </button>
-                    <p class="text-sm text-slate-400 mt-4">유지할 주사위는 클릭해서 잠글 수 있습니다.</p>
-                </div>
-
-                <!-- 랭킹 보드 (서버 연동) -->
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-slate-700 flex items-center gap-2">
-                            <i data-lucide="trophy" class="text-yellow-500"></i> 메이트 순위 (Top 5)
-                        </h2>
-                        <button onclick="fetchLeaderboard()" class="text-slate-400 hover:text-blue-500 p-1">
-                            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-                        </button>
-                    </div>
-                    <div class="space-y-2 min-h-[100px]" id="leaderboard-container">
-                        <div class="flex justify-center py-4">
-                            <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                        </div>
-                    </div>
+                    <p class="text-sm text-slate-400 mt-6 font-medium">💡 유지할 주사위는 클릭해서 잠글 수 있습니다.</p>
                 </div>
             </div>
 
             <!-- 오른쪽: 점수판 -->
-            <div class="bg-white p-0 rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
+            <div class="md:col-span-1 bg-white p-0 rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col h-full">
                 <div class="bg-slate-800 text-white p-4 font-bold text-center">점수판 (Scorecard)</div>
                 <div class="flex-grow overflow-auto">
                     <table class="w-full text-sm">
@@ -120,7 +103,7 @@
                             <tr id="row-fives"><td class="px-4 py-3 font-medium">Fives (5)</td><td class="px-4 py-3 text-right score-cell" onclick="recordScore('fives')"></td></tr>
                             <tr id="row-sixes"><td class="px-4 py-3 font-medium">Sixes (6)</td><td class="px-4 py-3 text-right score-cell" onclick="recordScore('sixes')"></td></tr>
                             
-                            <!-- 보너스 진행도 표시 영역 (추가됨) -->
+                            <!-- 보너스 진행도 -->
                             <tr class="bg-green-50/50">
                                 <td colspan="2" class="px-4 py-3">
                                     <div class="flex justify-between items-end mb-1">
@@ -144,6 +127,34 @@
                             <tr id="row-chance"><td class="px-4 py-3 font-medium">Chance</td><td class="px-4 py-3 text-right score-cell" onclick="recordScore('chance')"></td></tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메이트 명예의 전당 -->
+        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b pb-4 gap-4">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="trophy" class="text-yellow-500 w-6 h-6"></i> 메이트 명예의 전당
+                </h2>
+                
+                <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                    <!-- 탭 버튼 영역 -->
+                    <div class="bg-slate-100 p-1 rounded-lg flex gap-1">
+                        <button id="tab-monthly" onclick="switchTab('monthly')" class="px-4 py-1.5 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all">이달의 랭킹</button>
+                        <button id="tab-all" onclick="switchTab('all')" class="px-4 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-700 transition-all">누적 랭킹</button>
+                    </div>
+                    
+                    <button onclick="fetchLeaderboard()" class="text-slate-500 hover:text-blue-600 p-2 bg-slate-50 hover:bg-blue-50 rounded-lg transition-colors border border-slate-200" title="새로고침">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 랭킹 리스트 출력 영역 -->
+            <div class="space-y-3 min-h-[150px]" id="leaderboard-container">
+                <div class="flex justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                 </div>
             </div>
         </div>
@@ -174,16 +185,23 @@
 
     <script>
         // ===========================================================================
-        // 👇 1단계에서 복사한 구글 앱스 스크립트 '웹 앱 URL'을 아래 따옴표 안에 넣으세요!
+        // 구글 앱스 스크립트 '웹 앱 URL' 적용 완료
         // ===========================================================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAwdpnnrQzK0x97STZ8jaBxPyHkS9CMIFLHoXcKztqVzzg1PjGwJl9jwDgF17uVsTa/exec"; 
-        // 예시: const SCRIPT_URL = "https://script.google.com/macros/s/AKfycb.../exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyyBXE4xTTOuByGZe1Vug1IMRk2kk4cH1mSqm3_aq7_aXleUIXt2dOehixq70SwTDlb/exec"; 
 
+        // 랭킹 관리를 위한 전역 변수
+        let globalLeaderboardData = [];
+        let currentRankingTab = 'monthly'; // 'monthly' 또는 'all'
 
         // 초기화
         window.onload = function() {
             if (typeof lucide !== 'undefined') lucide.createIcons();
             initDice();
+            
+            // 이전에 저장했던 이름이 있다면 닉네임 칸에 미리 채워주기
+            const savedName = localStorage.getItem('yahtzee_my_name');
+            if(savedName) document.getElementById('player-name').value = savedName;
+            
             fetchLeaderboard();
         };
 
@@ -263,10 +281,10 @@
             const btn = document.getElementById('roll-btn');
             if (rollsLeft === 0) {
                 btn.disabled = true;
-                btn.innerHTML = '<i data-lucide="x-circle"></i> 횟수 소진 (점수를 선택하세요)';
+                btn.innerHTML = '<i data-lucide="x-circle" class="w-8 h-8"></i> 횟수 소진 (점수 선택)';
             } else {
                 btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="dice-5"></i> 굴리기!`;
+                btn.innerHTML = `<i data-lucide="dice-5" class="w-8 h-8"></i> 굴리기!`;
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
@@ -330,10 +348,9 @@
             nextTurn();
         }
 
-        // === [수정된 부분] 보너스 관련 상태 업데이트 로직 ===
         function updateTotals() {
             let upperSum = 0;
-            let upperCompleted = 0; // 상단 몇 개 채웠는지 확인용
+            let upperCompleted = 0; 
             
             ['ones', 'twos', 'threes', 'fours', 'fives', 'sixes'].forEach(cat => {
                 if (scores[cat] !== undefined) {
@@ -342,7 +359,6 @@
                 }
             });
             
-            // 상단 진행도 UI 업데이트
             const progressEl = document.getElementById('upper-progress');
             const displayEl = document.getElementById('upper-sum-display');
             const statusEl = document.getElementById('bonus-status');
@@ -399,8 +415,25 @@
             document.getElementById('game-over-modal').classList.remove('hidden');
         }
 
-        // --- 🌐 서버(구글 시트) 연동 로직 ---
+        // --- 🌐 서버(구글 시트) 및 랭킹 렌더링 로직 ---
         
+        // 탭 전환 함수
+        function switchTab(tab) {
+            currentRankingTab = tab;
+            
+            // 탭 스타일 변경
+            if(tab === 'monthly') {
+                document.getElementById('tab-monthly').className = "px-4 py-1.5 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all";
+                document.getElementById('tab-all').className = "px-4 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+            } else {
+                document.getElementById('tab-all').className = "px-4 py-1.5 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all";
+                document.getElementById('tab-monthly').className = "px-4 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+            }
+            
+            // 랭킹 다시 그리기
+            renderLeaderboard();
+        }
+
         async function fetchLeaderboard() {
             const container = document.getElementById('leaderboard-container');
             
@@ -409,33 +442,110 @@
                 return;
             }
 
-            container.innerHTML = '<div class="flex justify-center py-4"><div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div></div>';
+            container.innerHTML = '<div class="flex justify-center py-8"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>';
             
             try {
-                // 브라우저 캐싱 방지를 위해 timestamp를 추가하여 GET 요청
                 const requestUrl = `${SCRIPT_URL}?action=get&t=${Date.now()}`;
                 const response = await fetch(requestUrl);
-                const leaderboard = await response.json();
+                globalLeaderboardData = await response.json();
                 
-                if (leaderboard.length === 0) {
-                    container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">아직 기록이 없습니다. 첫 번째 랭커가 되어보세요!</p>';
-                    return;
-                }
-
-                container.innerHTML = leaderboard.map((p, i) => `
-                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-lg border border-slate-100">
-                        <div class="flex items-center gap-3">
-                            <span class="w-6 h-6 rounded-full flex justify-center items-center text-xs font-bold ${i===0 ? 'bg-yellow-400 text-white' : i===1 ? 'bg-slate-300 text-white' : i===2 ? 'bg-orange-300 text-white' : 'bg-transparent text-slate-400'}">${i+1}</span>
-                            <span class="font-bold text-slate-700">${p.name}</span>
-                        </div>
-                        <div class="font-mono font-black text-blue-600">${p.score}</div>
-                    </div>
-                `).join('');
+                renderLeaderboard();
                 
             } catch (error) {
                 console.error("랭킹 로드 실패:", error);
-                container.innerHTML = '<p class="text-sm text-red-500 text-center py-4">랭킹을 불러오는데 실패했습니다.</p>';
+                container.innerHTML = '<p class="text-sm text-red-500 text-center py-8 bg-red-50 rounded-xl">랭킹을 불러오는데 실패했습니다.</p>';
             }
+        }
+
+        // 받아온 데이터를 바탕으로 랭킹 화면에 그리기
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            
+            if (!globalLeaderboardData || globalLeaderboardData.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-400 text-center py-8 bg-slate-50 rounded-xl">아직 기록이 없습니다. 첫 번째 랭커가 되어보세요!</p>';
+                return;
+            }
+
+            // 이번 달 데이터 필터링 (월별 탭인 경우)
+            let displayData = [...globalLeaderboardData];
+            if (currentRankingTab === 'monthly') {
+                const now = new Date();
+                // "2026-04" 형식 (스크립트에서 yyyy-MM-dd 로 저장하게 함)
+                const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+                
+                displayData = displayData.filter(p => {
+                    if(!p.date) return false;
+                    // YYYY-MM-DD 또는 YYYY. MM. DD 형식을 처리하기 위해 앞부분 비교
+                    const dateStr = String(p.date).replace(/\./g, '-').replace(/\s/g, ''); 
+                    return dateStr.startsWith(currentMonthPrefix) || dateStr.includes(`${now.getFullYear()}-${now.getMonth()+1}`);
+                });
+            }
+
+            if (displayData.length === 0) {
+                container.innerHTML = '<p class="text-sm text-slate-400 text-center py-8 bg-slate-50 rounded-xl">이번 달은 아직 기록이 없습니다. 이달의 1위에 도전하세요!</p>';
+                return;
+            }
+
+            // 점수 내림차순 정렬 후 순위 부여
+            displayData.sort((a, b) => b.score - a.score);
+            displayData.forEach((p, idx) => p.rank = idx + 1);
+
+            const top5 = displayData.slice(0, 5);
+            
+            // 내 이름 찾기
+            const myName = localStorage.getItem('yahtzee_my_name');
+            let myHighestRecord = null;
+            
+            if (myName) {
+                myHighestRecord = displayData.find(p => p.name === myName); 
+            }
+
+            let html = '';
+            
+            // Top 5 출력
+            top5.forEach((p) => {
+                const isMe = myName && p.name === myName;
+                html += generateRankHTML(p.rank, p.name, p.score, isMe, p.date);
+            });
+
+            // 내 순위가 5등 밖일 경우 추가 표시
+            if (myHighestRecord && myHighestRecord.rank > 5) {
+                html += `<div class="text-center text-slate-300 py-1"><i data-lucide="more-vertical" class="w-5 h-5 mx-auto"></i></div>`;
+                html += generateRankHTML(myHighestRecord.rank, myHighestRecord.name, myHighestRecord.score, true, myHighestRecord.date);
+            }
+
+            container.innerHTML = html;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        // 랭킹 한 줄을 만드는 함수 (날짜 포함)
+        function generateRankHTML(rank, name, score, isMe, date) {
+            const badgeClass = rank === 1 ? 'bg-yellow-400 text-white shadow-md' : 
+                               rank === 2 ? 'bg-slate-300 text-white shadow-sm' : 
+                               rank === 3 ? 'bg-orange-300 text-white shadow-sm' : 
+                               'bg-slate-100 text-slate-500 font-medium';
+                               
+            const bgClass = isMe ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-slate-100 hover:bg-slate-50';
+            const meLabel = isMe ? `<span class="ml-2 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">나의 기록</span>` : '';
+            
+            // 날짜 포맷 정리 (예: 2026-04-21T... -> 2026-04-21)
+            let displayDate = "";
+            if(date) {
+                displayDate = String(date).split('T')[0]; // 시간 부분이 있다면 제거
+            }
+
+            return `
+                <div class="flex justify-between items-center ${bgClass} px-4 py-3 md:px-5 md:py-4 rounded-xl border transition-colors">
+                    <div class="flex items-center gap-3 md:gap-4">
+                        <span class="w-8 h-8 rounded-full flex justify-center items-center text-sm font-black flex-shrink-0 ${badgeClass}">${rank}</span>
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700 text-base md:text-lg">${name} ${meLabel}</span>
+                            <span class="text-xs text-slate-400 font-medium">${displayDate}</span>
+                        </div>
+                    </div>
+                    <div class="font-mono font-black text-xl md:text-2xl ${isMe ? 'text-blue-700' : 'text-slate-700'}">${score}</div>
+                </div>
+            `;
         }
 
         async function saveScoreToServer() {
@@ -450,27 +560,27 @@
                 return;
             }
 
+            // 내 이름을 브라우저에 기억해두기 (나중에 내 순위 찾을 때 사용)
+            localStorage.setItem('yahtzee_my_name', name);
+
             const score = updateTotals();
             const btn = document.getElementById('save-btn');
             
-            // 버튼 상태 변경 (저장 중)
             btn.disabled = true;
             btn.innerHTML = '<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> 저장 중...';
             btn.classList.replace('bg-green-600', 'bg-slate-400');
 
             try {
-                // CORS 문제 없이 데이터를 보내기 위해 URL 파라미터로 GET 요청
                 const requestUrl = `${SCRIPT_URL}?action=save&name=${encodeURIComponent(name)}&score=${score}&t=${Date.now()}`;
                 await fetch(requestUrl);
                 
                 alert("점수가 성공적으로 저장되었습니다!");
-                window.location.reload(); // 새로고침하면 랭킹도 갱신됩니다.
+                window.location.reload(); 
                 
             } catch (error) {
                 console.error("저장 실패:", error);
                 alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
                 
-                // 버튼 원상복구
                 btn.disabled = false;
                 btn.innerHTML = '<i data-lucide="upload-cloud"></i> 서버에 점수 저장하기';
                 btn.classList.replace('bg-slate-400', 'bg-green-600');
