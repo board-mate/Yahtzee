@@ -41,7 +41,6 @@
         .potential-score { color: #22c55e; font-weight: bold; cursor: pointer; }
         .potential-score:hover { background-color: #dcfce7; }
         
-        /* 프로그레스 바 스타일 */
         progress::-webkit-progress-bar { background-color: #e2e8f0; border-radius: 9999px; }
         progress::-webkit-progress-value { background-color: #22c55e; border-radius: 9999px; transition: width 0.3s ease; }
         progress::-moz-progress-bar { background-color: #22c55e; border-radius: 9999px; transition: width 0.3s ease; }
@@ -84,7 +83,7 @@
                         <i data-lucide="dice-5" class="w-8 h-8"></i>
                         굴리기!
                     </button>
-                    <p class="text-sm text-slate-400 mt-6 font-medium">💡 유지할 주사위는 클릭해서 잠글 수 있습니다.</p>
+                    <p class="text-sm text-slate-400 mt-6 font-medium">💡 점수판에서 원하는 항목을 클릭해 점수를 기록하세요.</p>
                 </div>
             </div>
 
@@ -163,7 +162,7 @@
         <footer class="mt-8 text-center pb-8">
             <a href="https://www.instagram.com/board__mate/" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-6 py-3 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 hover:text-pink-600 hover:border-pink-200 hover:bg-pink-50 transition-all font-bold group">
                 <i data-lucide="instagram" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
-                @board__mate 보드메이트 놀러가기
+                @board__mate 보드메이트 인스타
             </a>
         </footer>
     </div>
@@ -225,9 +224,22 @@
             const container = document.getElementById('dice-container');
             container.innerHTML = '';
             for (let i = 0; i < 5; i++) {
+                // 주사위와 자물쇠를 묶을 부모 요소 (flex-col)
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-col items-center gap-2';
+
+                // 자물쇠 인디케이터 (위쪽)
+                const lockIndicator = document.createElement('div');
+                lockIndicator.id = `lock-indicator-${i}`;
+                lockIndicator.className = 'text-slate-300 transition-colors duration-200 flex flex-col items-center cursor-pointer';
+                lockIndicator.innerHTML = '<i data-lucide="unlock" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">열림</span>';
+                // 자물쇠를 클릭해도 잠기도록 이벤트 연동
+                lockIndicator.onclick = () => toggleHold(i);
+
+                // 주사위 버튼
                 const btn = document.createElement('button');
                 btn.id = `die-${i}`;
-                btn.className = `w-16 h-16 md:w-20 md:h-20 bg-white border-4 border-slate-200 rounded-xl shadow-sm transition-all relative overflow-hidden flex items-center justify-center`;
+                btn.className = `w-16 h-16 md:w-20 md:h-20 bg-white border-4 border-slate-200 rounded-xl shadow-sm transition-all relative flex items-center justify-center hover:border-slate-300`;
                 btn.onclick = () => toggleHold(i);
                 
                 const face = document.createElement('div');
@@ -239,9 +251,13 @@
                 }
                 
                 btn.appendChild(face);
-                container.appendChild(btn);
+                
+                wrapper.appendChild(lockIndicator);
+                wrapper.appendChild(btn);
+                container.appendChild(wrapper);
             }
             updateRollBtnStatus();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function rollDice() {
@@ -273,16 +289,27 @@
         }
 
         function toggleHold(index) {
-            if (rollsLeft === 3) return;
+            if (rollsLeft === 3) return; // 첫 굴리기 전에는 잠금 방지
+            
             held[index] = !held[index];
             const die = document.getElementById(`die-${index}`);
+            const lockInd = document.getElementById(`lock-indicator-${index}`);
+            
             if (held[index]) {
-                die.classList.add('border-green-500', 'bg-green-50');
-                die.classList.remove('border-slate-200', 'bg-white');
+                die.classList.add('border-green-500', 'bg-green-50', '-translate-y-2', 'shadow-md');
+                die.classList.remove('border-slate-200', 'bg-white', 'shadow-sm', 'hover:border-slate-300');
+                
+                lockInd.className = 'text-green-600 transition-colors duration-200 flex flex-col items-center cursor-pointer';
+                lockInd.innerHTML = '<i data-lucide="lock" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">잠김</span>';
             } else {
-                die.classList.remove('border-green-500', 'bg-green-50');
-                die.classList.add('border-slate-200', 'bg-white');
+                die.classList.remove('border-green-500', 'bg-green-50', '-translate-y-2', 'shadow-md');
+                die.classList.add('border-slate-200', 'bg-white', 'shadow-sm', 'hover:border-slate-300');
+                
+                lockInd.className = 'text-slate-300 transition-colors duration-200 flex flex-col items-center cursor-pointer';
+                lockInd.innerHTML = '<i data-lucide="unlock" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">열림</span>';
             }
+            
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function updateRollBtnStatus() {
@@ -343,8 +370,9 @@
         }
 
         function recordScore(category) {
-            if (rollsLeft === 3) return;
+            if (rollsLeft === 3) return; // 굴리기 전 기록 방지
             if (scores[category] !== undefined) return;
+            
             scores[category] = calcScore(category);
             const row = document.getElementById(`row-${category}`);
             row.classList.add('category-filled');
@@ -405,16 +433,27 @@
                     document.querySelector(`#row-${cat} .score-cell`).className = 'px-4 py-3 text-right score-cell';
                 }
             });
+            
             if (round > 13) { endGame(); return; }
+            
             document.getElementById('round-display').innerText = round;
             rollsLeft = 3;
             held = [false, false, false, false, false];
+            
+            // 주사위 및 자물쇠 상태 초기화
             for (let i = 0; i < 5; i++) {
                 const die = document.getElementById(`die-${i}`);
-                die.classList.remove('border-green-500', 'bg-green-50');
-                die.classList.add('border-slate-200', 'bg-white');
+                const lockInd = document.getElementById(`lock-indicator-${i}`);
+                
+                die.classList.remove('border-green-500', 'bg-green-50', '-translate-y-2', 'shadow-md');
+                die.classList.add('border-slate-200', 'bg-white', 'shadow-sm', 'hover:border-slate-300');
+                
+                lockInd.className = 'text-slate-300 transition-colors duration-200 flex flex-col items-center cursor-pointer';
+                lockInd.innerHTML = '<i data-lucide="unlock" class="w-5 h-5"></i><span class="text-[10px] font-bold mt-0.5">열림</span>';
             }
+            
             updateRollBtnStatus();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function endGame() {
@@ -425,11 +464,9 @@
 
         // --- 🌐 서버(구글 시트) 및 랭킹 렌더링 로직 ---
         
-        // 탭 전환 함수
         function switchTab(tab) {
             currentRankingTab = tab;
             
-            // 탭 스타일 변경
             if(tab === 'monthly') {
                 document.getElementById('tab-monthly').className = "px-4 py-1.5 text-sm font-bold rounded-md bg-white text-blue-600 shadow-sm transition-all";
                 document.getElementById('tab-all').className = "px-4 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-700 transition-all";
@@ -438,7 +475,6 @@
                 document.getElementById('tab-monthly').className = "px-4 py-1.5 text-sm font-bold rounded-md text-slate-500 hover:text-slate-700 transition-all";
             }
             
-            // 랭킹 다시 그리기
             renderLeaderboard();
         }
 
@@ -465,7 +501,6 @@
             }
         }
 
-        // 받아온 데이터를 바탕으로 랭킹 화면에 그리기
         function renderLeaderboard() {
             const container = document.getElementById('leaderboard-container');
             
@@ -474,16 +509,13 @@
                 return;
             }
 
-            // 이번 달 데이터 필터링 (월별 탭인 경우)
             let displayData = [...globalLeaderboardData];
             if (currentRankingTab === 'monthly') {
                 const now = new Date();
-                // "2026-04" 형식 (스크립트에서 yyyy-MM-dd 로 저장하게 함)
                 const currentMonthPrefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
                 
                 displayData = displayData.filter(p => {
                     if(!p.date) return false;
-                    // YYYY-MM-DD 또는 YYYY. MM. DD 형식을 처리하기 위해 앞부분 비교
                     const dateStr = String(p.date).replace(/\./g, '-').replace(/\s/g, ''); 
                     return dateStr.startsWith(currentMonthPrefix) || dateStr.includes(`${now.getFullYear()}-${now.getMonth()+1}`);
                 });
@@ -494,13 +526,11 @@
                 return;
             }
 
-            // 점수 내림차순 정렬 후 순위 부여
             displayData.sort((a, b) => b.score - a.score);
             displayData.forEach((p, idx) => p.rank = idx + 1);
 
             const top5 = displayData.slice(0, 5);
             
-            // 내 이름 찾기
             const myName = localStorage.getItem('yahtzee_my_name');
             let myHighestRecord = null;
             
@@ -510,13 +540,11 @@
 
             let html = '';
             
-            // Top 5 출력
             top5.forEach((p) => {
                 const isMe = myName && p.name === myName;
                 html += generateRankHTML(p.rank, p.name, p.score, isMe, p.date);
             });
 
-            // 내 순위가 5등 밖일 경우 추가 표시
             if (myHighestRecord && myHighestRecord.rank > 5) {
                 html += `<div class="text-center text-slate-300 py-1"><i data-lucide="more-vertical" class="w-5 h-5 mx-auto"></i></div>`;
                 html += generateRankHTML(myHighestRecord.rank, myHighestRecord.name, myHighestRecord.score, true, myHighestRecord.date);
@@ -526,7 +554,6 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
-        // 랭킹 한 줄을 만드는 함수 (날짜 포함)
         function generateRankHTML(rank, name, score, isMe, date) {
             const badgeClass = rank === 1 ? 'bg-yellow-400 text-white shadow-md' : 
                                rank === 2 ? 'bg-slate-300 text-white shadow-sm' : 
@@ -536,10 +563,9 @@
             const bgClass = isMe ? 'bg-blue-50 border-blue-200 shadow-sm' : 'bg-white border-slate-100 hover:bg-slate-50';
             const meLabel = isMe ? `<span class="ml-2 text-[10px] bg-blue-500 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">나의 기록</span>` : '';
             
-            // 날짜 포맷 정리 (예: 2026-04-21T... -> 2026-04-21)
             let displayDate = "";
             if(date) {
-                displayDate = String(date).split('T')[0]; // 시간 부분이 있다면 제거
+                displayDate = String(date).split('T')[0]; 
             }
 
             return `
@@ -568,7 +594,6 @@
                 return;
             }
 
-            // 내 이름을 브라우저에 기억해두기 (나중에 내 순위 찾을 때 사용)
             localStorage.setItem('yahtzee_my_name', name);
 
             const score = updateTotals();
